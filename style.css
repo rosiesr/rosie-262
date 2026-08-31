@@ -1,0 +1,350 @@
+@import url('https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800&display=swap');
+
+:root {
+  --base: #FAF7F2;
+  --brown: #3D2F26;
+  --blue: #2E7DB8;
+  --blue-deep: #1F5A87;
+  --olive: #6B7A4F;
+  --pink: #F5A0B5;
+  --neutral: #7A6A5A;
+  --line: rgba(61, 47, 38, 0.12);
+
+  --font: 'Figtree', -apple-system, BlinkMacSystemFont, sans-serif;
+
+  --gutter: 6vw;
+  --max-w: 720px;
+}
+
+* { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  margin: 0;
+  background: var(--base);
+  color: var(--brown);
+  font-family: var(--font);
+  font-size: 17px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  * { animation-duration: 0.001ms !important; transition-duration: 0.001ms !important; }
+}
+
+a { color: var(--blue-deep); }
+a:focus-visible, button:focus-visible { outline: 2px solid var(--blue); outline-offset: 3px; }
+
+/* ---------- Nav ---------- */
+.nav {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px var(--gutter);
+  background: rgba(250, 247, 242, 0.88);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--line);
+}
+
+.nav a {
+  text-decoration: none;
+  color: var(--brown);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.nav .brand {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--brown);
+}
+
+.nav .links {
+  display: flex;
+}
+
+.nav .links a {
+  margin-left: 18px;
+  font-size: 0.88rem;
+  color: var(--neutral);
+}
+.nav .links a.active,
+.nav .links a:hover {
+  color: var(--blue-deep);
+}
+
+@media (max-width: 400px) {
+  .nav { padding: 14px 5vw; }
+  .nav .brand { font-size: 0.92rem; }
+  .nav .links a { margin-left: 12px; font-size: 0.78rem; }
+}
+
+/* ---------- Hero ---------- */
+.hero {
+  position: relative;
+  overflow: hidden;
+}
+
+.hero-photo-wrap {
+  position: relative;
+  width: 100%;
+  height: 0;
+  padding-top: 125%; /* 4:5 on mobile, via padding-percentage technique for broad compatibility */
+  max-height: 88vh;
+  overflow: hidden;
+}
+
+@media (min-width: 640px) {
+  .hero-photo-wrap { padding-top: 62.5%; max-height: 78vh; } /* 16:10 */
+}
+
+.hero-photo-wrap img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 20%;
+}
+
+.hero-photo-wrap::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(61,47,38,0) 40%, rgba(61,47,38,0.55) 100%);
+}
+
+.hero-route {
+  display: block;
+  width: 150px;
+  height: 28px;
+  margin: 6px 0 14px;
+  overflow: visible;
+}
+
+.hero-route path {
+  fill: none;
+  stroke: var(--pink);
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-dasharray: 220;
+  stroke-dashoffset: 220;
+  animation: draw-route 1.4s ease-out 0.5s forwards;
+}
+
+@keyframes draw-route {
+  to { stroke-dashoffset: 0; }
+}
+
+.hero-text {
+  position: absolute;
+  left: var(--gutter);
+  right: var(--gutter);
+  bottom: 28px;
+  z-index: 3;
+  color: #FAF7F2;
+}
+
+.hero-text h1 {
+  font-size: clamp(2rem, 7vw, 3.2rem);
+  font-weight: 800;
+  line-height: 1.05;
+  margin: 0 0 10px;
+  letter-spacing: -0.01em;
+}
+
+.hero-text p {
+  font-size: clamp(1rem, 3vw, 1.15rem);
+  max-width: 44ch;
+  margin: 0;
+  color: #F3ECE3;
+}
+
+/* ---------- Sections ---------- */
+.section {
+  padding: 64px var(--gutter);
+  max-width: var(--max-w);
+  margin: 0 auto;
+}
+
+.section + .section {
+  border-top: 1px solid var(--line);
+}
+
+.section h2 {
+  font-size: clamp(1.4rem, 4vw, 1.8rem);
+  font-weight: 700;
+  margin: 0 0 20px;
+  color: var(--brown);
+}
+
+.section p {
+  margin: 0 0 18px;
+  color: var(--brown);
+  max-width: 62ch;
+}
+
+.section p:last-child { margin-bottom: 0; }
+
+.section.tint {
+  background: var(--base);
+}
+
+/* project name highlight - understated, not a badge */
+.project-name {
+  color: var(--blue-deep);
+  font-weight: 600;
+}
+
+/* ---------- Photo strip / carousel ---------- */
+.photo-strip {
+  display: flex;
+  gap: 14px;
+  overflow-x: auto;
+  margin: 28px calc(var(--gutter) * -1) 0;
+  padding: 4px var(--gutter) 12px;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+}
+
+.photo-strip::-webkit-scrollbar { height: 6px; }
+.photo-strip::-webkit-scrollbar-thumb { background: var(--line); border-radius: 3px; }
+
+.photo-strip img {
+  scroll-snap-align: start;
+  flex: 0 0 auto;
+  height: 260px;
+  width: auto;
+  max-width: 82vw;
+  object-fit: cover;
+  border-radius: 10px;
+}
+
+@media (min-width: 640px) {
+  .photo-strip img { height: 320px; }
+}
+
+/* ---------- The Ask ---------- */
+.ask-primary {
+  background: var(--blue);
+  color: #FAF7F2;
+  border-radius: 16px;
+  padding: 32px;
+  margin-top: 8px;
+}
+
+.ask-primary p { color: #F3ECE3; }
+
+.venmo-handle {
+  display: inline-block;
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #FAF7F2;
+  background: rgba(250, 247, 242, 0.14);
+  border: 1.5px solid rgba(250, 247, 242, 0.4);
+  border-radius: 999px;
+  padding: 10px 24px;
+  margin: 14px 0 18px;
+  text-decoration: none;
+}
+
+.venmo-handle:hover { background: rgba(250, 247, 242, 0.22); }
+
+.disclosure {
+  font-size: 0.88rem;
+  color: rgba(243, 236, 227, 0.85);
+  border-top: 1px solid rgba(250, 247, 242, 0.25);
+  padding-top: 14px;
+  margin-top: 18px;
+}
+
+.ask-secondary {
+  margin-top: 22px;
+  padding: 22px;
+  border: 1.5px solid var(--line);
+  border-radius: 16px;
+}
+
+.ask-secondary p { margin-bottom: 14px; }
+
+.btn-outline {
+  display: inline-block;
+  border: 1.5px solid var(--brown);
+  color: var(--brown);
+  text-decoration: none;
+  font-weight: 600;
+  padding: 10px 22px;
+  border-radius: 999px;
+  font-size: 0.95rem;
+}
+
+.btn-outline:hover {
+  background: var(--brown);
+  color: var(--base);
+}
+
+/* ---------- Sign-off ---------- */
+.signoff {
+  text-align: left;
+  color: var(--neutral);
+  font-style: normal;
+}
+
+/* ---------- Footer ---------- */
+.footer {
+  padding: 32px var(--gutter) 56px;
+  color: var(--neutral);
+  font-size: 0.85rem;
+  border-top: 1px solid var(--line);
+}
+
+.footer a { color: var(--neutral); }
+
+/* ---------- Journey page specific ---------- */
+.journey-hero {
+  padding: 56px var(--gutter) 0;
+  max-width: var(--max-w);
+  margin: 0 auto;
+}
+
+.journey-hero h1 {
+  font-size: clamp(1.8rem, 6vw, 2.6rem);
+  font-weight: 800;
+  margin: 0 0 8px;
+  color: var(--brown);
+}
+
+.journey-hero .kicker {
+  color: var(--olive);
+  font-weight: 600;
+  margin: 0 0 4px;
+}
+
+.strava-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+  color: var(--blue-deep);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.strava-link:hover { text-decoration: underline; }
+
+/* ---------- Coming soon (unused now, kept minimal if needed) ---------- */
+.coming-soon {
+  padding: 120px var(--gutter);
+  text-align: center;
+  color: var(--neutral);
+}
