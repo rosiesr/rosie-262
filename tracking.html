@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tracking Runners &middot; Rosie Runs</title>
+<meta name="description" content="Where and when to cheer for Rosie at the 2026 TCS New York City Marathon.">
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
+<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+<link rel="shortcut icon" href="/favicon.ico" />
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+</head>
+<body>
+
+<nav class="nav">
+  <a href="index.html" class="brand">Rosie Runs</a>
+  <div class="links">
+    <a href="index.html">Home</a>
+    <a href="journey.html">My Journey</a>
+    <a href="tracking.html" class="active">Tracking</a>
+  </div>
+</nav>
+
+<div class="journey-hero">
+  <h1>Tracking Runners</h1>
+  <div class="runner-tabs" role="tablist" aria-label="Runners">
+    <button type="button" role="tab" id="tab-rosie" class="runner-tab active" aria-selected="true" aria-controls="panel-rosie" data-runner="rosie">Rosie</button>
+    <button type="button" role="tab" id="tab-jackson" class="runner-tab" aria-selected="false" aria-controls="panel-jackson" data-runner="jackson">Jackson</button>
+  </div>
+</div>
+
+<section class="section runner-panel">
+  <div id="panel-rosie" role="tabpanel" aria-labelledby="tab-rosie">
+    <h2>Where to find me on race day</h2>
+    <p class="race-facts"><strong>Start time:</strong> 9:50 am (Wave 2)<br><strong>Expected pace:</strong> 8:10&ndash;8:30/mi</p>
+    <p>Each window runs from my fast pace (8:10) to my slow pace (8:30) at that mile, plus 5 minutes of buffer on each side. For where I actually am, use the live tracker.</p>
+    <a class="btn-track" href="https://rtrt.me/ny2026/track/RR3XPHZ2" target="_blank" rel="noopener">Live track me on NYRR &rarr;</a>
+  </div>
+
+  <div id="panel-jackson" role="tabpanel" aria-labelledby="tab-jackson" hidden>
+    <h2>Where to find Jackson on race day</h2>
+    <p class="race-facts"><strong>Start time:</strong> 9:05 am<br><strong>Expected finish:</strong> 3:00:00<br><strong>Expected pace:</strong> 6:52/mi</p>
+    <p>Each window runs from 6:45/mi to 7:05/mi at that mile, with 5 minutes of buffer before and 10 minutes after.</p>
+    <a class="btn-track" href="https://rtrt.me/ny2026/track/RF5U9JNZ" target="_blank" rel="noopener">Live track Jackson on NYRR &rarr;</a>
+  </div>
+
+  <div id="live-status" class="live-status" hidden></div>
+
+  <div id="map" class="course-map" role="region" aria-label="NYC Marathon course map with cheer spots"></div>
+
+  <ol id="spots" class="spot-list"></ol>
+
+  <p class="fine-print">Times are estimates from each runner's start time and goal pace, not live. Course line from a Strava route of the NYC Marathon course.</p>
+</section>
+
+<footer class="footer">
+  <p>Rosie Runs for Climate &middot; TCS New York City Marathon 2026 &middot; <a href="index.html">Back home</a></p>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script src="course.js"></script>
+<script>
+(function () {
+  var RACE_DAY = [2026, 10, 1]; // Nov 1, 2026 (months are 0-indexed)
+  var FULL = 26.2188;
+
+  // Paces in min/mile; buffers in minutes added before the fast pace and after the slow pace.
+  var RUNNERS = {
+    rosie:   { name: 'Rosie',   me: true,  start: { h: 9, m: 50 }, fast: 8 + 10 / 60, slow: 8 + 30 / 60, early: 5, late: 5 },
+    jackson: { name: 'Jackson', me: false, start: { h: 9, m: 5 },  fast: 6 + 45 / 60, slow: 7 + 5 / 60,  early: 5, late: 10 }
+  };
+  var runner = RUNNERS.rosie;
+
+  var ICONS = {
+    cheer: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 11 18-5v12L3 14v-3z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/></svg>',
+    finish: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><path d="M4 22v-7"/></svg>'
+  };
+
+  var SPOTS = [
+    { mile: 8,    name: 'Downtown Brooklyn', where: 'Lafayette Ave just off Flatbush Ave, by Barclays Center' },
+    { mile: 11,   name: 'Williamsburg', where: 'Bedford Ave around S 4th St' },
+    { mile: 15.5, name: 'Queensboro Bridge', where: 'Mid-bridge over Roosevelt Island. No spectators on the bridge, so watch from where runners come off it onto 1st Ave around 59th St (~mile 16, add ~4 min)' },
+    { mile: 18,   name: 'First Ave, halfway up to the Bronx', where: '1st Ave around E 96th St' },
+    { mile: 22.5, name: 'Fifth Ave, halfway down from the Bronx', where: '5th Ave around E 112th St, Harlem' },
+    { mile: 23.7, name: 'Entering Central Park', where: "Engineers' Gate, 5th Ave & E 90th St" },
+    { mile: 25.5, name: 'Bottom of Central Park', where: 'Central Park South around 6th Ave' },
+    { mile: 26.2, name: 'Finish', where: 'West Drive by Tavern on the Green (W 67th St). Finish area is ticketed, so meet up after on the Upper West Side', icon: 'finish' }
+  ];
+
+  function raceDate(minAfterStart) {
+    var d = new Date(RACE_DAY[0], RACE_DAY[1], RACE_DAY[2], runner.start.h, runner.start.m);
+    return new Date(d.getTime() + minAfterStart * 60000);
+  }
+  function fmt(d) {
+    var h = d.getHours(), m = d.getMinutes();
+    return ((h + 11) % 12 + 1) + ':' + (m < 10 ? '0' : '') + m + (h < 12 ? ' am' : ' pm');
+  }
+  function windowFor(mile) {
+    return {
+      early: raceDate(mile * runner.fast - runner.early),
+      likely: raceDate(mile * (runner.fast + runner.slow) / 2),
+      late: raceDate(mile * runner.slow + runner.late)
+    };
+  }
+
+  // Course geometry: cumulative distance so spots can be placed by mile.
+  var pts = window.COURSE, cum = [0];
+  function dist(a, b) {
+    var R = 3958.8, r = Math.PI / 180;
+    var dLat = (b[0] - a[0]) * r, dLng = (b[1] - a[1]) * r;
+    var h = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(a[0] * r) * Math.cos(b[0] * r) * Math.sin(dLng / 2) * Math.sin(dLng / 2);
+    return 2 * R * Math.asin(Math.sqrt(h));
+  }
+  for (var i = 1; i < pts.length; i++) cum.push(cum[i - 1] + dist(pts[i - 1], pts[i]));
+  var scale = FULL / cum[cum.length - 1];
+  function pointAt(mile) {
+    var target = Math.max(0, Math.min(FULL, mile)) / scale;
+    for (var j = 1; j < pts.length; j++) {
+      if (cum[j] >= target) {
+        var f = (target - cum[j - 1]) / ((cum[j] - cum[j - 1]) || 1);
+        return [pts[j - 1][0] + f * (pts[j][0] - pts[j - 1][0]), pts[j - 1][1] + f * (pts[j][1] - pts[j - 1][1])];
+      }
+    }
+    return pts[pts.length - 1];
+  }
+
+  var map = L.map('map', { scrollWheelZoom: false, zoomSnap: 0.25 });
+  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 19,
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+  }).addTo(map);
+
+  var line = L.polyline(pts, { color: '#2E7DB8', weight: 5, opacity: 0.9 }).addTo(map);
+  map.fitBounds(line.getBounds(), { padding: [16, 16] });
+
+  for (var mi = 5; mi <= 25; mi += 5) {
+    L.marker(pointAt(mi), {
+      interactive: false,
+      icon: L.divIcon({ className: 'mile-tag', html: mi, iconSize: [22, 22] })
+    }).addTo(map);
+  }
+  var startMarker = L.marker(pointAt(0), {
+    icon: L.divIcon({ className: 'mile-tag start', html: 'S', iconSize: [22, 22] })
+  }).addTo(map);
+
+  var list = document.getElementById('spots');
+  var spotLayer = L.layerGroup().addTo(map);
+
+  function render() {
+    startMarker.bindPopup('<strong>Start</strong><br>Staten Island, ' + fmt(raceDate(0)));
+    spotLayer.clearLayers();
+    list.innerHTML = '';
+    SPOTS.forEach(function (s) {
+      var w = windowFor(s.mile);
+      var range = fmt(w.early) + ' &ndash; ' + fmt(w.late);
+      var popup = '<strong>' + s.name + '</strong><br>' + runner.name + ', mile ' + s.mile + '<br>' + range +
+        '<br><span class="popup-likely">Most likely ~' + fmt(w.likely) + '</span>';
+      var m = L.marker(pointAt(s.mile), {
+        icon: L.divIcon({ className: 'spot-pin', html: ICONS[s.icon || 'cheer'], iconSize: [30, 30] })
+      }).bindPopup(popup).addTo(spotLayer);
+
+      var li = document.createElement('li');
+      li.innerHTML =
+        '<button type="button" class="spot">' +
+          '<span class="spot-num">' + ICONS[s.icon || 'cheer'] + '</span>' +
+          '<span class="spot-body">' +
+            '<span class="spot-name">' + s.name + ' <span class="spot-mile">Mile ' + s.mile + '</span></span>' +
+            '<span class="spot-time">' + range + '</span>' +
+            '<span class="spot-where">' + s.where + '</span>' +
+          '</span>' +
+        '</button>';
+      li.querySelector('button').addEventListener('click', function () {
+        map.flyTo(m.getLatLng(), 15, { duration: 0.8 });
+        m.openPopup();
+        document.getElementById('map').scrollIntoView({ behavior: 'smooth', block: 'center' });
+      });
+      list.appendChild(li);
+    });
+    updateLive();
+  }
+
+  // On race day, show roughly where the selected runner would be right now at their average goal pace.
+  var liveDot = null;
+  function updateLive() {
+    var elapsed = (new Date() - raceDate(0)) / 60000;
+    var status = document.getElementById('live-status');
+    var avg = (runner.fast + runner.slow) / 2;
+    var who = runner.me ? 'I' : runner.name;
+    if (elapsed < -180 || elapsed > FULL * runner.slow + runner.late + 30) {
+      status.hidden = true;
+      if (liveDot) { map.removeLayer(liveDot); liveDot = null; }
+      return;
+    }
+    status.hidden = false;
+    if (elapsed < 0) {
+      status.textContent = 'Race day! ' + who + ' start' + (runner.me ? '' : 's') + ' in about ' + Math.ceil(-elapsed) + ' min.';
+      return;
+    }
+    var mile = Math.min(FULL, elapsed / avg);
+    status.textContent = mile >= FULL
+      ? who + ' should be finished (or very close). Check the live tracker!'
+      : 'If ' + (runner.me ? "I'm" : runner.name + "'s") + ' on pace, ' + (runner.me ? "I'm" : 'he\'s') +
+        ' near mile ' + mile.toFixed(1) + ' right now (estimate, see live tracker).';
+    if (!liveDot) {
+      liveDot = L.circleMarker(pointAt(mile), { radius: 9, color: '#fff', weight: 3, fillColor: '#F5A0B5', fillOpacity: 1 }).addTo(map);
+    } else {
+      liveDot.setLatLng(pointAt(mile));
+    }
+  }
+
+  var tabs = document.querySelectorAll('.runner-tab');
+  function select(key) {
+    if (!RUNNERS[key]) return;
+    runner = RUNNERS[key];
+    tabs.forEach(function (tab) {
+      var on = tab.dataset.runner === key;
+      tab.classList.toggle('active', on);
+      tab.setAttribute('aria-selected', on);
+      document.getElementById(tab.getAttribute('aria-controls')).hidden = !on;
+    });
+    map.closePopup();
+    render();
+  }
+  tabs.forEach(function (tab) {
+    tab.addEventListener('click', function () {
+      history.replaceState(null, '', '#' + tab.dataset.runner);
+      select(tab.dataset.runner);
+    });
+  });
+
+  select(location.hash.slice(1) in RUNNERS ? location.hash.slice(1) : 'rosie');
+  setInterval(updateLive, 30000);
+})();
+</script>
+</body>
+</html>
