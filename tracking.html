@@ -29,6 +29,7 @@
     <button type="button" role="tab" id="tab-rosie" class="runner-tab active" aria-selected="true" aria-controls="panel-rosie" data-runner="rosie">Rosie</button>
     <button type="button" role="tab" id="tab-jackson" class="runner-tab" aria-selected="false" aria-controls="panel-jackson" data-runner="jackson">Jackson</button>
     <button type="button" role="tab" id="tab-jordan" class="runner-tab" aria-selected="false" aria-controls="panel-jordan" data-runner="jordan">Jordan</button>
+    <button type="button" role="tab" id="tab-artur" class="runner-tab" aria-selected="false" aria-controls="panel-artur" data-runner="artur">Artur</button>
   </div>
 </div>
 
@@ -51,6 +52,11 @@
     <h2>Where to find Jordan on race day</h2>
     <p class="race-facts"><strong>Start time:</strong> 9:50 am (Wave 2)<br><strong>Expected finish:</strong> 3:40:00-ish<br><strong>Expected pace:</strong> 8:24/mi-ish</p>
     <a class="btn-track" href="https://rtrt.me/ny2026/track/RU95WSJA" target="_blank" rel="noopener">Live track Jordan on NYRR &rarr;</a>
+  </div>
+
+  <div id="panel-artur" role="tabpanel" aria-labelledby="tab-artur" hidden>
+    <h2>Where to find Artur on race day</h2>
+    <p class="race-facts"><strong>Start time:</strong> 10:55 am (Wave 4)<br><strong>Expected pace:</strong> 10:00/mi</p>
   </div>
 
   <div id="live-status" class="live-status" hidden></div>
@@ -77,7 +83,8 @@
   var RUNNERS = {
     rosie:   { name: 'Rosie',   me: true,  start: { h: 9, m: 50 }, fast: 8 + 10 / 60, slow: 8 + 30 / 60, early: 5, late: 5 },
     jackson: { name: 'Jackson', me: false, start: { h: 9, m: 5 },  fast: 6 + 45 / 60, slow: 7 + 5 / 60,  early: 5, late: 10, theyre: "he's" },
-    jordan:  { name: 'Jordan',  me: false, start: { h: 9, m: 50 }, fast: 220 / FULL,  slow: 220 / FULL,  early: 5, late: 10, theyre: "she's" }
+    jordan:  { name: 'Jordan',  me: false, start: { h: 9, m: 50 }, fast: 220 / FULL,  slow: 220 / FULL,  early: 5, late: 10, theyre: "she's" },
+    artur:   { name: 'Artur',   me: false, start: { h: 10, m: 55 }, fast: 10,       slow: 10,        early: 5, late: 10, theyre: "he's" }
   };
   var runner = RUNNERS.rosie;
 
