@@ -28,6 +28,7 @@
   <div class="runner-tabs" role="tablist" aria-label="Runners">
     <button type="button" role="tab" id="tab-rosie" class="runner-tab active" aria-selected="true" aria-controls="panel-rosie" data-runner="rosie">Rosie</button>
     <button type="button" role="tab" id="tab-jackson" class="runner-tab" aria-selected="false" aria-controls="panel-jackson" data-runner="jackson">Jackson</button>
+    <button type="button" role="tab" id="tab-jordan" class="runner-tab" aria-selected="false" aria-controls="panel-jordan" data-runner="jordan">Jordan</button>
   </div>
 </div>
 
@@ -44,6 +45,12 @@
     <p class="race-facts"><strong>Start time:</strong> 9:05 am<br><strong>Expected finish:</strong> 3:00:00<br><strong>Expected pace:</strong> 6:52/mi</p>
     <p>Each window runs from 6:45/mi to 7:05/mi at that mile, with 5 minutes of buffer before and 10 minutes after.</p>
     <a class="btn-track" href="https://rtrt.me/ny2026/track/RF5U9JNZ" target="_blank" rel="noopener">Live track Jackson on NYRR &rarr;</a>
+  </div>
+
+  <div id="panel-jordan" role="tabpanel" aria-labelledby="tab-jordan" hidden>
+    <h2>Where to find Jordan on race day</h2>
+    <p class="race-facts"><strong>Start time:</strong> 9:50 am (Wave 2)<br><strong>Expected finish:</strong> 3:40:00<br><strong>Expected pace:</strong> 8:24/mi</p>
+    <a class="btn-track" href="https://rtrt.me/ny2026/track/RU95WSJA" target="_blank" rel="noopener">Live track Jordan on NYRR &rarr;</a>
   </div>
 
   <div id="live-status" class="live-status" hidden></div>
@@ -69,7 +76,8 @@
   // Paces in min/mile; buffers in minutes added before the fast pace and after the slow pace.
   var RUNNERS = {
     rosie:   { name: 'Rosie',   me: true,  start: { h: 9, m: 50 }, fast: 8 + 10 / 60, slow: 8 + 30 / 60, early: 5, late: 5 },
-    jackson: { name: 'Jackson', me: false, start: { h: 9, m: 5 },  fast: 6 + 45 / 60, slow: 7 + 5 / 60,  early: 5, late: 10 }
+    jackson: { name: 'Jackson', me: false, start: { h: 9, m: 5 },  fast: 6 + 45 / 60, slow: 7 + 5 / 60,  early: 5, late: 10, theyre: "he's" },
+    jordan:  { name: 'Jordan',  me: false, start: { h: 9, m: 50 }, fast: 220 / FULL,  slow: 220 / FULL,  early: 5, late: 10, theyre: "she's" }
   };
   var runner = RUNNERS.rosie;
 
@@ -202,7 +210,7 @@
     var mile = Math.min(FULL, elapsed / avg);
     status.textContent = mile >= FULL
       ? who + ' should be finished (or very close). Check the live tracker!'
-      : 'If ' + (runner.me ? "I'm" : runner.name + "'s") + ' on pace, ' + (runner.me ? "I'm" : 'he\'s') +
+      : 'If ' + (runner.me ? "I'm" : runner.name + "'s") + ' on pace, ' + (runner.me ? "I'm" : runner.theyre) +
         ' near mile ' + mile.toFixed(1) + ' right now (estimate, see live tracker).';
     if (!liveDot) {
       liveDot = L.circleMarker(pointAt(mile), { radius: 9, color: '#fff', weight: 3, fillColor: '#F5A0B5', fillOpacity: 1 }).addTo(map);
